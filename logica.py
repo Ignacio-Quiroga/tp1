@@ -1,63 +1,93 @@
 import random
 
+TAMANIO_GRILLA = 4
+TECLAS = ["w", "d", "s", "a"]
+NUMERO_FINAL = 2048
+VALORES_ALEATORIOS = [2, 4]
+VALOR_VACIO = " "
+SEPARADOR_VERTICAL = "|"
+SEPARADOR_HORIZONTAL = "-----------" * TAMANIO_GRILLA
+
+
 # Inicializar juego
 def inicializar_juego():
-    juego = [[None for _ in range(4)] for _ in range(4)]
+    """
+    :return: Devuelve un nuevo juego
+    """
+    juego = [[VALOR_VACIO for _ in range(TAMANIO_GRILLA)] for _ in range(TAMANIO_GRILLA)]
     juego = insertar_nuevo_random(juego)
     juego = insertar_nuevo_random(juego)
     return juego
 
+
 # Mostrar juego
 def mostrar_juego(grilla):
-
     print()
-    print(f"    {grilla[0][0]}  |   {grilla[0][1]}  |   {grilla[0][2]}  |   {grilla[0][3]}  ")
-    print("---------------------------------------")
-    print(f"    {grilla[1][0]}  |   {grilla[1][1]}  |   {grilla[1][2]}  |   {grilla[1][3]}  ")
-    print("---------------------------------------")
-    print(f"    {grilla[2][0]}  |   {grilla[2][1]}  |   {grilla[2][2]}  |   {grilla[2][3]}  ")
-    print("---------------------------------------")
-    print(f"    {grilla[3][0]}  |   {grilla[3][1]}  |   {grilla[3][2]}  |   {grilla[3][3]}  ")
-    print("---------------------------------------")
+    for linea in grilla:
+        for elemento in linea:
+            print(f"{SEPARADOR_VERTICAL}{elemento:^10}", end="")
+        print(f"{SEPARADOR_VERTICAL}\n{SEPARADOR_HORIZONTAL}")
+
+    print("\n")
+
+
 # Juego ganado
 def juego_ganado(juego):
+    """
+    :param juego:
+    :return: True, si juego ganado; False, caso contrario
+    """
+
     for fila in juego:
-        if 2048 in fila:
+        if NUMERO_FINAL in fila:
             return True
     return False
 
+
 # Juego perdido
 def juego_perdido(juego):
-    for fila in juego:
-        if None in fila:
-            return False
-    return True
+    """El juego se considera perdido cuando se llena el tablero y no hay ningun movimiento posible"""
+    if validar_tablero_lleno(juego):
+        # Si el tablero está lleno, verificamos si existe combinacion posible en el
+        return validar_tablero_lleno(juego)
+        # Si NO existe combinacion posible, el juego se considera perdido
+    return False
 
 
 # Pedir direccion
 def pedir_direccion(juego):
-  '''
+    """
     movimiento_valido = False
     while not movimiento_valido:
         dir = input("Seleccione una direccion (w, a, s,d): ")
         movimiento_valido = verificar_validez_movimiento(dir)
         if direccion_valida(juego, dir):
-            return dir
-'''
-  dir = input("Seleccione una direccion (w, a, s,d): ")
-  return dir
-# Actualizar juego
+            return dir """
 
+    while True:
+        # Mientras la tecla no sea valida se pide.
+        dir = input("Seleccione una direccion (w, a, s, d): ")
+        # Para que sea valida, debe ser del alfabeto y debe estar en las posibles teclas
+        if (not dir.isalpha()) or (not tecla_valida(dir)):
+            print("La tecla ingresada es invalida\n")
+        else:
+            break  # Condicion de corte
+
+    return dir.lower()
+
+
+# Actualizar juego
 def actualizar_juego(juego, dir):
-    '''
+    """
     - Trasponer el tablero si es necesario
     - Por cada fila:
         - Invertir la fila si es necesario
         - Combinar en nueva fila
         - Invertir la fila resultante si es necesario
-    - Trasponer el tablero resultante si es necesario'''
+    - Trasponer el tablero resultante si es necesario"""
 
     nuevo_juego = []
+
     if dir == 'a':
         for fila in juego:
 
@@ -85,9 +115,11 @@ def actualizar_juego(juego, dir):
         return invertir_matriz(nuevo_juego)
 
 
-
-
 def combinar_en_nueva_fila(fila):
+    """
+    :param fila:
+    :return: Devuelve una nueva fila, combinando los elementos si son iguales.
+    """
 
     len_original = len(fila)
 
@@ -99,7 +131,6 @@ def combinar_en_nueva_fila(fila):
     actual = 0
     siguente = 1
     resultante = []
-
 
     if fila == resultante:
         fila = agregar_none(fila, cantidad_none_a_agregar)
@@ -133,41 +164,97 @@ def combinar_en_nueva_fila(fila):
     resultante = agregar_none(resultante, cantidad_none_a_agregar)
     return resultante
 
+
 def eliminar_none(fila):
+    """
+    :param fila:
+    :return: fila quitando los valores vacios para operar
+    """
     nueva_fila = []
     for elemento in fila:
-        if elemento:
+        if elemento != VALOR_VACIO:
             nueva_fila.append(elemento)
     return nueva_fila
 
+
 def agregar_none(fila, cantidad):
+    """
+    :param fila:
+    :param cantidad:
+    :return: Fila con los valores vacios correspondientes
+    """
     for i in range(cantidad):
-        fila.append(None)
+        fila.append(VALOR_VACIO)
     return fila
+
 
 def invertir_fila(fila):
     return fila[::-1]
 
+
 def invertir_matriz(juego):
+    """
+    :param juego:
+    :return: La grilla invertira
+    """
     matriz_invertida = []
-    for col in range(len(juego)):
+    for col in range(TAMANIO_GRILLA):
         fila_invertida = []
-        for fila in range(len(juego)):
+        for fila in range(TAMANIO_GRILLA):
             fila_invertida.append(juego[fila][col])
         matriz_invertida.append(fila_invertida)
 
     return matriz_invertida
+
+
 # Insertar nuevo random
 def insertar_nuevo_random(nuevo_juego):
-    ''' Insertar un nuevo elemento a la grilla y devolver un nuevo juego'''
+    """
+    :param nuevo_juego: 
+    :return: Devuelve el juego luego de insertar un nuevo elemento en una posicion random
+    """""
     while True:
-        fila = random.randint(0, 3)
-        col = random.randint(0, 3)
-        if nuevo_juego[fila][col] == None:
-            nuevo_juego[fila][col] = 2
+        fila = random.randint(0, TAMANIO_GRILLA - 1)
+        col = random.randint(0, TAMANIO_GRILLA - 1)
+
+        if nuevo_juego[fila][col] == VALOR_VACIO:
+            nuevo_juego[fila][col] = VALORES_ALEATORIOS[random.randint(0, len(VALORES_ALEATORIOS) - 1)]
             break
     return nuevo_juego
 
 
+def tecla_valida(movimiento):
+    """
+    :param movimiento:
+    :return: True, si la tecla esta contemplada; False, caso contrario
+    """
+    return movimiento.lower() in TECLAS
 
+
+def validar_existencia_combinacion_posible(juego):
+    """
+    :param juego:
+    :return: Devuelve True si hay una combinacion posible en el juego; Devuelve False si no existe combinacion posible
+    En el caso que ninguna combinacion sea posible y el tablero este lleno, el juego resulta perdido
+
+    Para verificar evaluamos el juego en todas las direcciones posibles, si el nuevo_juego resulta
+    diferente para alguno de ellos,
+    quiere decir que hay movimiento posible
+    """
+    for direccion in TECLAS:
+        juego_nuevo = actualizar_juego(juego, direccion)
+        if juego_nuevo != juego:
+            return True
+    return False
+
+
+def validar_tablero_lleno(juego):
+    """
+    :param juego:
+    :return: True si no existen espacios vacios en el tablero; False en caso contrario
+    """
+    for fila in juego:
+        if VALOR_VACIO in fila:
+            return False
+    return True
 
